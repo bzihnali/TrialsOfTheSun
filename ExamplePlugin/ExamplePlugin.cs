@@ -43,6 +43,7 @@ namespace ExamplePlugin
 
         // We need our item definition to persist through our functions, and therefore make it a class field.
         private static ItemDef myItemDef;
+        private static ItemDef myItemDef2;
 
         // The Awake() method is run at the very start when the game is initialized.
         public void Awake()
@@ -52,6 +53,9 @@ namespace ExamplePlugin
 
             // First let's define our item
             myItemDef = ScriptableObject.CreateInstance<ItemDef>();
+
+            myItemDef2 = ScriptableObject.CreateInstance<ItemDef>();
+
 
             // Language Tokens, explained there https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/Assets/Localization/ [will not use, not needed RN]
 
@@ -66,6 +70,18 @@ namespace ExamplePlugin
             LanguageAPI.Add("WF_BINDINGBLOOD_DESC", "Binds the concept of blood. <style=cIsHealing>Healing</style> reduced by <style=cIsUtility>90%</style>.");
             LanguageAPI.Add("WF_BINDINGBLOOD_LORE", "I fear my brother cannot understand why I protect these beings; to him they are \"parasites\", undeserving of our grace. But I know better. \n\nI am loath to create these chains, these bindings, but to protect them... it must be done, and I am the only one who can do so. ");
 
+
+            //SOUL
+            myItemDef.name = "WF_BINDINGSOUL_NAME";
+            myItemDef.nameToken = "WF_BINDINGSOUL_NAME";
+            myItemDef.pickupToken = "WF_BINDINGSOUL_PICKUP";
+            myItemDef.descriptionToken = "WF_BINDINGSOUL_DESC";
+            myItemDef.loreToken = "WF_BINDINGSOUL_LORE";
+
+            LanguageAPI.Add("WF_BINDINGSOUL_NAME", "Binding of Soul");
+            LanguageAPI.Add("WF_BINDINGSOUL_PICKUP", "Greatly increases cooldowns");
+            LanguageAPI.Add("WF_BINDINGSOUL_DESC", "Binds the concept of soul. All <style=cIsUtility>Cooldowns</style> are increased by <style=cIsUtility>100%</style>.");
+            LanguageAPI.Add("WF_BINDINGSOUL_LORE", "My soul hurted");
             /*
             myItemDef.name = "Binding of Blood";
             myItemDef.nameToken = "Binding of Blood";
@@ -79,6 +95,7 @@ namespace ExamplePlugin
             // and finally NoTier is generally used for helper items, like the tonic affliction
 #pragma warning disable Publicizer001 // Accessing a member that was not originally public. Here we ignore this warning because with how this example is setup we are forced to do this
             myItemDef._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
+            myItemDef2._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
 #pragma warning restore Publicizer001
             // Instead of loading the itemtierdef directly, you can also do this like below as a workaround
             // myItemDef.deprecatedTier = ItemTier.Tier2;
@@ -87,16 +104,21 @@ namespace ExamplePlugin
             myItemDef.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteFire/texAffixRedIcon.png").WaitForCompletion();
             myItemDef.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteFire/PickupEliteFire.prefab").WaitForCompletion();
 
+            myItemDef2.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteFire/texAffixRedIcon.png").WaitForCompletion();
+            myItemDef2.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteFire/PickupEliteFire.prefab").WaitForCompletion();
+
             // Can remove determines
             // if a shrine of order,
             // or a printer can take this item,
             // generally true, except for NoTier items.
             myItemDef.canRemove = false;
+            myItemDef2.canRemove = false;
 
             // Hidden means that there will be no pickup notification,
             // and it won't appear in the inventory at the top of the screen.
             // This is useful for certain noTier helper items, such as the DrizzlePlayerHelper.
             myItemDef.hidden = false;
+            myItemDef2.hidden = false;
 
             // You can add your own display rules here,
             // where the first argument passed are the default display rules:
@@ -108,9 +130,12 @@ namespace ExamplePlugin
             // Then finally add it to R2API
             ItemAPI.Add(new CustomItem(myItemDef, displayRules));
 
+            ItemAPI.Add(new CustomItem(myItemDef2, displayRules));
+
             // But now we have defined an item, but it doesn't do anything yet. So we'll need to define that ourselves.
             // GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
             On.RoR2.HealthComponent.Heal += HealthComponent_Heal;
+         //   On.RoR2.SkillLocator.RpcDeductCooldownFromAllSkillsServer += SkillCooldown_Increase;
         }
 
         // On heal, reduce healing by 90%
@@ -122,6 +147,14 @@ namespace ExamplePlugin
                 amount *= 0.1f;
             }
             return orig(self, amount, procChainMask, nonRegen);
+        }
+        private float SkillCooldown_Increase(HealthComponent self, float amount)
+        {
+            if(self.body.inventory.GetItemCount(myItemDef2.itemIndex) > 0)
+            {
+                amount *= 2;
+            }
+            return amount;
         }
         private void GlobalEventManager_onCharacterDeathGlobal(DamageReport report)
         {
