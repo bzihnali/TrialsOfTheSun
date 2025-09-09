@@ -42,7 +42,8 @@ namespace ExamplePlugin
         public const string PluginVersion = "0.0.1";
 
         // We need our item definition to persist through our functions, and therefore make it a class field.
-        private static ItemDef myItemDef;
+        private static ItemDef bindingBlood;
+        private static ItemDef bindingSoul;
 
         // The Awake() method is run at the very start when the game is initialized.
         public void Awake()
@@ -51,21 +52,36 @@ namespace ExamplePlugin
             Log.Init(Logger);
 
             // First let's define our item
-            myItemDef = ScriptableObject.CreateInstance<ItemDef>();
+            bindingBlood = ScriptableObject.CreateInstance<ItemDef>();
+
+            bindingSoul = ScriptableObject.CreateInstance<ItemDef>();
+
 
             // Language Tokens, explained there https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/Assets/Localization/ [will not use, not needed RN]
 
-            myItemDef.name = "WF_BINDINGBLOOD_NAME";
-            myItemDef.nameToken = "WF_BINDINGBLOOD_NAME";
-            myItemDef.pickupToken = "WF_BINDINGBLOOD_PICKUP";
-            myItemDef.descriptionToken = "WF_BINDINGBLOOD_DESC";
-            myItemDef.loreToken = "WF_BINDINGBLOOD_LORE";
+            bindingBlood.name = "WF_BINDINGBLOOD_NAME";
+            bindingBlood.nameToken = "WF_BINDINGBLOOD_NAME";
+            bindingBlood.pickupToken = "WF_BINDINGBLOOD_PICKUP";
+            bindingBlood.descriptionToken = "WF_BINDINGBLOOD_DESC";
+            bindingBlood.loreToken = "WF_BINDINGBLOOD_LORE";
 
             LanguageAPI.Add("WF_BINDINGBLOOD_NAME", "Binding of Blood");
             LanguageAPI.Add("WF_BINDINGBLOOD_PICKUP", "Massively reduces healing.");
             LanguageAPI.Add("WF_BINDINGBLOOD_DESC", "Binds the concept of blood. <style=cIsHealing>Healing</style> reduced by <style=cIsUtility>90%</style>.");
             LanguageAPI.Add("WF_BINDINGBLOOD_LORE", "I fear my brother cannot understand why I protect these beings; to him they are \"parasites\", undeserving of our grace. But I know better. \n\nI am loath to create these chains, these bindings, but to protect them... it must be done, and I am the only one who can do so. ");
 
+
+            //SOUL
+            bindingSoul.name = "WF_BINDINGSOUL_NAME";
+            bindingSoul.nameToken = "WF_BINDINGSOUL_NAME";
+            bindingSoul.pickupToken = "WF_BINDINGSOUL_PICKUP";
+            bindingSoul.descriptionToken = "WF_BINDINGSOUL_DESC";
+            bindingSoul.loreToken = "WF_BINDINGSOUL_LORE";
+
+            LanguageAPI.Add("WF_BINDINGSOUL_NAME", "Binding of Soul");
+            LanguageAPI.Add("WF_BINDINGSOUL_PICKUP", "Greatly increases cooldowns");
+            LanguageAPI.Add("WF_BINDINGSOUL_DESC", "Binds the concept of soul. All <style=cIsUtility>Cooldowns</style> are increased by <style=cIsUtility>100%</style>.");
+            LanguageAPI.Add("WF_BINDINGSOUL_LORE", "My soul hurted");
             /*
             myItemDef.name = "Binding of Blood";
             myItemDef.nameToken = "Binding of Blood";
@@ -78,25 +94,31 @@ namespace ExamplePlugin
             // Tier1=white, Tier2=green, Tier3=red, Lunar=Lunar, Boss=yellow,
             // and finally NoTier is generally used for helper items, like the tonic affliction
 #pragma warning disable Publicizer001 // Accessing a member that was not originally public. Here we ignore this warning because with how this example is setup we are forced to do this
-            myItemDef._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
+            bindingBlood._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
+            bindingSoul._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
 #pragma warning restore Publicizer001
             // Instead of loading the itemtierdef directly, you can also do this like below as a workaround
             // myItemDef.deprecatedTier = ItemTier.Tier2;
 
             // You can create your own icons and prefabs through assetbundles, but to keep this boilerplate brief, we'll be using question marks.
-            myItemDef.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteFire/texAffixRedIcon.png").WaitForCompletion();
-            myItemDef.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteFire/PickupEliteFire.prefab").WaitForCompletion();
+            bindingBlood.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteFire/texAffixRedIcon.png").WaitForCompletion();
+            bindingBlood.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteFire/PickupEliteFire.prefab").WaitForCompletion();
+
+            bindingSoul.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteFire/texAffixRedIcon.png").WaitForCompletion();
+            bindingSoul.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteFire/PickupEliteFire.prefab").WaitForCompletion();
 
             // Can remove determines
             // if a shrine of order,
             // or a printer can take this item,
             // generally true, except for NoTier items.
-            myItemDef.canRemove = false;
+            bindingBlood.canRemove = false;
+            bindingSoul.canRemove = false;
 
             // Hidden means that there will be no pickup notification,
             // and it won't appear in the inventory at the top of the screen.
             // This is useful for certain noTier helper items, such as the DrizzlePlayerHelper.
-            myItemDef.hidden = false;
+            bindingBlood.hidden = false;
+            bindingSoul.hidden = false;
 
             // You can add your own display rules here,
             // where the first argument passed are the default display rules:
@@ -106,22 +128,31 @@ namespace ExamplePlugin
             var displayRules = new ItemDisplayRuleDict(null);
 
             // Then finally add it to R2API
-            ItemAPI.Add(new CustomItem(myItemDef, displayRules));
+            ItemAPI.Add(new CustomItem(bindingBlood, displayRules));
+
+            ItemAPI.Add(new CustomItem(bindingSoul, displayRules));
 
             // But now we have defined an item, but it doesn't do anything yet. So we'll need to define that ourselves.
             // GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
             On.RoR2.HealthComponent.Heal += HealthComponent_Heal;
+            // On.RoR2.GenericSkill.CalculateFinalRechargeInterval += SkillCooldown_Increase; // FiX LATER
+            // On.RoR2.SkillLocator.RpcDeductCooldownFromAllSkillsServer += SkillCooldown_Increase;
+            
         }
 
         // On heal, reduce healing by 90%
         private float HealthComponent_Heal(On.RoR2.HealthComponent.orig_Heal orig, HealthComponent self, float amount, ProcChainMask procChainMask, bool nonRegen)
         {
-            int count = self.body.inventory.GetItemCount(myItemDef.itemIndex);
+            int count = self.body.inventory.GetItemCount(bindingBlood.itemIndex);
             if (self && self.body && self.body.inventory && count != 0)
             {
                 amount *= 0.1f;
             }
             return orig(self, amount, procChainMask, nonRegen);
+        }
+        private float SkillCooldown_Increase(On.RoR2.GenericSkill.orig_CalculateFinalRechargeInterval orig, GenericSkill self)
+        {
+            return self.baseRechargeInterval > 0 ? Mathf.Max(0.5f, self.baseRechargeInterval * self.cooldownScale - self.flatCooldownReduction) : 0;
         }
         private void GlobalEventManager_onCharacterDeathGlobal(DamageReport report)
         {
@@ -137,7 +168,7 @@ namespace ExamplePlugin
             if (attackerCharacterBody.inventory)
             {
                 // Store the amount of our item we have
-                var garbCount = attackerCharacterBody.inventory.GetItemCount(myItemDef.itemIndex);
+                var garbCount = attackerCharacterBody.inventory.GetItemCount(bindingBlood.itemIndex);
                 if (garbCount > 0 &&
                     // Roll for our 50% chance.
                     Util.CheckRoll(50, attackerCharacterBody.master))
@@ -161,7 +192,8 @@ namespace ExamplePlugin
                 // And then drop our defined item in front of the player.
 
                 Log.Info($"Player pressed F2. Spawning our custom item at coordinates {transform.position}");
-                PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(myItemDef.itemIndex), transform.position, transform.forward * 20f);
+                PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(bindingBlood.itemIndex), transform.position, transform.forward * 20f);
+                PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(bindingSoul.itemIndex), transform.position, transform.forward * 20f);
             }
 
             if (Input.GetKeyDown(KeyCode.F3))
