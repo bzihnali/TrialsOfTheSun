@@ -1,5 +1,6 @@
 using BepInEx;
 using R2API;
+using R2API.ContentManagement;
 using RoR2;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -16,6 +17,7 @@ namespace ExamplePlugin
     // You don't need this if you're not using R2API in your plugin,
     // it's just to tell BepInEx to initialize R2API before this plugin so it's safe to use R2API.
     [BepInDependency(ItemAPI.PluginGUID)]
+    [BepInDependency(RecalculateStatsAPI.PluginGUID)]
 
     // This one is because we use a .language file for language tokens
     // More info in https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/Assets/Localization/
@@ -44,6 +46,7 @@ namespace ExamplePlugin
         // We need our item definition to persist through our functions, and therefore make it a class field.
         private static ItemDef bindingBlood;
         private static ItemDef bindingSoul;
+        private static ItemDef bindingMass;
 
         // The Awake() method is run at the very start when the game is initialized.
         public void Awake()
@@ -56,7 +59,7 @@ namespace ExamplePlugin
 
             bindingSoul = ScriptableObject.CreateInstance<ItemDef>();
 
-
+            bindingMass = ScriptableObject.CreateInstance<ItemDef>();
             // Language Tokens, explained there https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/Assets/Localization/ [will not use, not needed RN]
 
             bindingBlood.name = "WF_BINDINGBLOOD_NAME";
@@ -67,7 +70,7 @@ namespace ExamplePlugin
 
             LanguageAPI.Add("WF_BINDINGBLOOD_NAME", "Binding of Blood");
             LanguageAPI.Add("WF_BINDINGBLOOD_PICKUP", "Massively reduces healing.");
-            LanguageAPI.Add("WF_BINDINGBLOOD_DESC", "Binds the concept of blood. <style=cIsHealing>Healing</style> reduced by <style=cIsUtility>90%</style>.");
+            LanguageAPI.Add("WF_BINDINGBLOOD_DESC", "Binds the concept of Blood. <style=cIsHealing>Healing</style> reduced by <style=cIsUtility>90%</style>.");
             LanguageAPI.Add("WF_BINDINGBLOOD_LORE", "I fear my brother cannot understand why I protect these beings; to him they are \"parasites\", undeserving of our grace. But I know better. \n\nI am loath to create these chains, these bindings, but to protect them... it must be done, and I am the only one who can do so. ");
 
 
@@ -79,9 +82,20 @@ namespace ExamplePlugin
             bindingSoul.loreToken = "WF_BINDINGSOUL_LORE";
 
             LanguageAPI.Add("WF_BINDINGSOUL_NAME", "Binding of Soul");
-            LanguageAPI.Add("WF_BINDINGSOUL_PICKUP", "Greatly increases cooldowns");
-            LanguageAPI.Add("WF_BINDINGSOUL_DESC", "Binds the concept of soul. All <style=cIsUtility>Cooldowns</style> are increased by <style=cIsUtility>100%</style>.");
+            LanguageAPI.Add("WF_BINDINGSOUL_PICKUP", "Greatly reduces damage");
+            LanguageAPI.Add("WF_BINDINGSOUL_DESC", "Binds the concept of Soul. All <style=cIsUtility>Damage</style> is reduced by <style=cIsUtility>50%</style>.");
             LanguageAPI.Add("WF_BINDINGSOUL_LORE", "My soul hurted");
+
+            bindingMass.name = "WF_BINDINGMASS_NAME";
+            bindingMass.nameToken = "WF_BINDINGMASS_NAME";
+            bindingMass.pickupToken = "WF_BINDINGMASS_PICKUP";
+            bindingMass.descriptionToken = "WF_BINDINGMASS_DESC";
+            bindingMass.loreToken = "WF_BINDINGMASS_LORE";
+
+            LanguageAPI.Add("WF_BINDINGMASS_NAME", "Binding of Mass");
+            LanguageAPI.Add("WF_BINDINGMASS_PICKUP", "Greatly reduces Movement");
+            LanguageAPI.Add("WF_BINDINGMASS_DESC", "Binds the concept of Mass. All <style=cIsUtility>Movement</style> is reduced by <style=cIsUtility>25%</style>.");
+            LanguageAPI.Add("WF_BINDINGMASS_LORE", "No no Movement");
             /*
             myItemDef.name = "Binding of Blood";
             myItemDef.nameToken = "Binding of Blood";
@@ -96,6 +110,7 @@ namespace ExamplePlugin
 #pragma warning disable Publicizer001 // Accessing a member that was not originally public. Here we ignore this warning because with how this example is setup we are forced to do this
             bindingBlood._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
             bindingSoul._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
+            bindingMass._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
 #pragma warning restore Publicizer001
             // Instead of loading the itemtierdef directly, you can also do this like below as a workaround
             // myItemDef.deprecatedTier = ItemTier.Tier2;
@@ -104,8 +119,13 @@ namespace ExamplePlugin
             bindingBlood.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteFire/texAffixRedIcon.png").WaitForCompletion();
             bindingBlood.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteFire/PickupEliteFire.prefab").WaitForCompletion();
 
-            bindingSoul.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteFire/texAffixRedIcon.png").WaitForCompletion();
-            bindingSoul.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteFire/PickupEliteFire.prefab").WaitForCompletion();
+            bindingSoul.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteLunar/texAffixLunarIcon.png").WaitForCompletion();
+            bindingSoul.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteLunar/PickupEliteLunar.prefab").WaitForCompletion();
+
+            bindingMass.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteLunar/texAffixLunarIcon.png").WaitForCompletion();
+            bindingMass.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteLunar/PickupEliteLunar.prefab").WaitForCompletion();
+
+
 
             // Can remove determines
             // if a shrine of order,
@@ -135,9 +155,9 @@ namespace ExamplePlugin
             // But now we have defined an item, but it doesn't do anything yet. So we'll need to define that ourselves.
             // GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
             On.RoR2.HealthComponent.Heal += HealthComponent_Heal;
-            // On.RoR2.GenericSkill.CalculateFinalRechargeInterval += SkillCooldown_Increase; // FiX LATER
-            // On.RoR2.SkillLocator.RpcDeductCooldownFromAllSkillsServer += SkillCooldown_Increase;
-            
+            RecalculateStatsAPI.GetStatCoefficients += SkillDamageReduce;
+            RecalculateStatsAPI.GetStatCoefficients += MovementNerf;
+
         }
 
         // On heal, reduce healing by 90%
@@ -150,9 +170,23 @@ namespace ExamplePlugin
             }
             return orig(self, amount, procChainMask, nonRegen);
         }
-        private float SkillCooldown_Increase(On.RoR2.GenericSkill.orig_CalculateFinalRechargeInterval orig, GenericSkill self)
+        private void SkillDamageReduce(CharacterBody sender, RecalculateStatsAPI.StatHookEventArgs args)
         {
-            return self.baseRechargeInterval > 0 ? Mathf.Max(0.5f, self.baseRechargeInterval * self.cooldownScale - self.flatCooldownReduction) : 0;
+            int count = sender.inventory.GetItemCount(bindingSoul.itemIndex);
+            if (count != 0)
+            {
+                args.cooldownMultAdd -= 3f;
+                args.damageTotalMult = 0.5f;
+            }
+        }
+        private void MovementNerf(CharacterBody sender, RecalculateStatsAPI.StatHookEventArgs args)
+        {
+            int count = sender.inventory.GetItemCount(bindingSoul.itemIndex);
+            if (count != 0)
+            {
+                args.jumpPowerTotalMult = 0.75f;
+                args.moveSpeedTotalMult = 0.75f;
+            }
         }
         private void GlobalEventManager_onCharacterDeathGlobal(DamageReport report)
         {
