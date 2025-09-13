@@ -47,6 +47,7 @@ namespace ExamplePlugin
         private static ItemDef bindingBlood;
         private static ItemDef bindingSoul;
         private static ItemDef bindingMass;
+        private static ItemDef bindingDesign;
 
         // The Awake() method is run at the very start when the game is initialized.
         public void Awake()
@@ -60,8 +61,11 @@ namespace ExamplePlugin
             bindingSoul = ScriptableObject.CreateInstance<ItemDef>();
 
             bindingMass = ScriptableObject.CreateInstance<ItemDef>();
+
+            bindingDesign = ScriptableObject.CreateInstance<ItemDef>();
             // Language Tokens, explained there https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/Assets/Localization/ [will not use, not needed RN]
 
+            //Blood
             bindingBlood.name = "WF_BINDINGBLOOD_NAME";
             bindingBlood.nameToken = "WF_BINDINGBLOOD_NAME";
             bindingBlood.pickupToken = "WF_BINDINGBLOOD_PICKUP";
@@ -74,7 +78,7 @@ namespace ExamplePlugin
             LanguageAPI.Add("WF_BINDINGBLOOD_LORE", "I fear my brother cannot understand why I protect these beings; to him they are \"parasites\", undeserving of our grace. But I know better. \n\nI am loath to create these chains, these bindings, but to protect them... it must be done, and I am the only one who can do so. ");
 
 
-            //SOUL
+            //Soul
             bindingSoul.name = "WF_BINDINGSOUL_NAME";
             bindingSoul.nameToken = "WF_BINDINGSOUL_NAME";
             bindingSoul.pickupToken = "WF_BINDINGSOUL_PICKUP";
@@ -86,6 +90,7 @@ namespace ExamplePlugin
             LanguageAPI.Add("WF_BINDINGSOUL_DESC", "Binds the concept of Soul. All <style=cIsUtility>Damage</style> is reduced by <style=cIsUtility>50%</style>.");
             LanguageAPI.Add("WF_BINDINGSOUL_LORE", "My soul hurted");
 
+            //Mass
             bindingMass.name = "WF_BINDINGMASS_NAME";
             bindingMass.nameToken = "WF_BINDINGMASS_NAME";
             bindingMass.pickupToken = "WF_BINDINGMASS_PICKUP";
@@ -96,6 +101,19 @@ namespace ExamplePlugin
             LanguageAPI.Add("WF_BINDINGMASS_PICKUP", "Greatly reduces Movement");
             LanguageAPI.Add("WF_BINDINGMASS_DESC", "Binds the concept of Mass. All <style=cIsUtility>Movement</style> is reduced by <style=cIsUtility>25%</style>.");
             LanguageAPI.Add("WF_BINDINGMASS_LORE", "No no Movement");
+
+            //Design
+            bindingMass.name = "WF_BINDINGDESIGN_NAME";
+            bindingMass.nameToken = "WF_BINDINGDESIGN_NAME";
+            bindingMass.pickupToken = "WF_BINDINGDESIGN_PICKUP";
+            bindingMass.descriptionToken = "WF_BINDINGDESIGN_DESC";
+            bindingMass.loreToken = "WF_BINDINGDESIGN_LORE";
+
+            LanguageAPI.Add("WF_BINDINGDESIGN_NAME", "Binding of Design");
+            LanguageAPI.Add("WF_BINDINGDESIGN_PICKUP", "Reduces the strength of all items");
+            LanguageAPI.Add("WF_BINDINGDESIGN_DESC", "Binds the concept of Design. All <style=cIsUtility>Item</style> benefits are weakened by <style=cIsUtility>25%</style>.");
+            LanguageAPI.Add("WF_BINDINGDESIGN_LORE", "What are you without your equipment?");
+
             /*
             myItemDef.name = "Binding of Blood";
             myItemDef.nameToken = "Binding of Blood";
@@ -111,6 +129,7 @@ namespace ExamplePlugin
             bindingBlood._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
             bindingSoul._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
             bindingMass._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
+            bindingDesign._itemTierDef = Addressables.LoadAssetAsync<ItemTierDef>("RoR2/Base/Common/BossTierDef.asset").WaitForCompletion();
 #pragma warning restore Publicizer001
             // Instead of loading the itemtierdef directly, you can also do this like below as a workaround
             // myItemDef.deprecatedTier = ItemTier.Tier2;
@@ -125,7 +144,8 @@ namespace ExamplePlugin
             bindingMass.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteLunar/texAffixLunarIcon.png").WaitForCompletion();
             bindingMass.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteLunar/PickupEliteLunar.prefab").WaitForCompletion();
 
-
+            bindingDesign.pickupIconSprite = Addressables.LoadAssetAsync<Sprite>("RoR2/Base/EliteLunar/texAffixLunarIcon.png").WaitForCompletion();
+            bindingDesign.pickupModelPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteLunar/PickupEliteLunar.prefab").WaitForCompletion();
 
             // Can remove determines
             // if a shrine of order,
@@ -133,12 +153,16 @@ namespace ExamplePlugin
             // generally true, except for NoTier items.
             bindingBlood.canRemove = false;
             bindingSoul.canRemove = false;
+            bindingMass.canRemove = false;
+            bindingDesign.canRemove = false;
 
             // Hidden means that there will be no pickup notification,
             // and it won't appear in the inventory at the top of the screen.
             // This is useful for certain noTier helper items, such as the DrizzlePlayerHelper.
             bindingBlood.hidden = false;
             bindingSoul.hidden = false;
+            bindingMass.hidden = false;
+            bindingDesign.hidden = false;
 
             // You can add your own display rules here,
             // where the first argument passed are the default display rules:
@@ -151,6 +175,10 @@ namespace ExamplePlugin
             ItemAPI.Add(new CustomItem(bindingBlood, displayRules));
 
             ItemAPI.Add(new CustomItem(bindingSoul, displayRules));
+
+            ItemAPI.Add(new CustomItem(bindingMass, displayRules));
+
+            ItemAPI.Add(new CustomItem(bindingDesign, displayRules));
 
             // But now we have defined an item, but it doesn't do anything yet. So we'll need to define that ourselves.
             // GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
@@ -181,11 +209,38 @@ namespace ExamplePlugin
         }
         private void MovementNerf(CharacterBody sender, RecalculateStatsAPI.StatHookEventArgs args)
         {
-            int count = sender.inventory.GetItemCount(bindingSoul.itemIndex);
+            int count = sender.inventory.GetItemCount(bindingMass.itemIndex);
             if (count != 0)
             {
                 args.jumpPowerTotalMult = 0.75f;
                 args.moveSpeedTotalMult = 0.75f;
+            }
+        }
+        private void InventoryAdjustment(CharacterBody sender)
+        {
+            Inventory invRef = sender.inventory;
+            if (invRef.GetItemCount(bindingMass.itemIndex) > 0 && invRef.GetEquipmentSlotCount() > 0)
+            {
+                for (int i = 0; i < invRef.GetEquipmentSlotCount(); i++)
+                {
+                    //// To iterate through every item, you can loop from 0 to the total number of items
+                    //// in the ItemCatalog.
+                    //for (int i = 0; i < ItemCatalog.itemCount; i++)
+                    //{
+                    //    ItemIndex itemIndex = (ItemIndex)i;
+                    //    int count = body.inventory.GetItemCount(itemIndex);
+
+                    //    if (count > 0)
+                    //    {
+                    //        ItemDef itemDef = ItemCatalog.GetItemDef(itemIndex);
+                    //        if (itemDef != null)
+                    //        {
+                    //            Debug.Log($"Player has {count} stack(s) of {itemDef.name}");
+                    //        }
+                    //    }
+                    //}
+
+                }
             }
         }
         private void GlobalEventManager_onCharacterDeathGlobal(DamageReport report)
