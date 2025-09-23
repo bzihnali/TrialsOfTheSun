@@ -1,0 +1,4 @@
+repository "TrialOfTheSun/TrialOfTheSun@2474983230437@cloud"
+  path "/"
+    br "/main"
+    co "/main"

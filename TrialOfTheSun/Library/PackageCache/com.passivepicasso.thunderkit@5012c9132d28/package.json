@@ -1,0 +1,16 @@
+{
+  "name": "com.passivepicasso.thunderkit",
+  "version": "9.1.4",
+  "displayName": "ThunderKit",
+  "description": "Unity Game Mod Development extension with build, packaging and analysis tools",
+  "unity": "2018.4",
+  "release": "12f1",
+  "author": {
+    "name": "ThunderKit",
+    "url": "https://github.com/PassivePicasso/ThunderKit"
+  },
+  "dependencies": {
+    "com.unity.scriptablebuildpipeline": "1.16.1"
+  },
+  "_fingerprint": "5012c9132d282d3e57446779936a43e72533b3f7"
+}
